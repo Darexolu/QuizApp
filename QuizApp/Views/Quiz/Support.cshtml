@@ -1,0 +1,23 @@
+﻿@model List<Question>
+<h2>Hello Welcome to Support Role Examination</h2>
+<h4>Questions and Options</h4>
+@using (Html.BeginForm("SubmitAnswer", "Quiz", FormMethod.Post))
+{
+    @for(int i = 0; i < Model.Count; i++)
+    {
+        <div>
+            <h4>@Model[i].Text</h4>
+            @for(var j = 0;  j < Model[i].Answers.Count; j++)
+            {    
+                <div>
+                    
+                  <input type="checkbox"  name="answers[@i]" value="@j"/> @Model[i].Answers[j].Text
+                </div>
+            }
+        </div>
+    }
+    <button type="submit">Submit</button>
+}
+
+    
+
