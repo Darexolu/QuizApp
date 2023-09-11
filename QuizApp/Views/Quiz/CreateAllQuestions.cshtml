@@ -1,0 +1,44 @@
+﻿@model CreateQuestionViewModel
+    <h2>Create Questions</h2>
+@*    <div asp-validation-summary="ModelOnly"></div>
+    <form asp-controller="Quiz", new { viewNumber = Model.ViewNumber } asp-action="CreateAllQuestions" method="post">
+*@        @using (Html.BeginForm("CreateAllQuestions", "Quiz",@*, new { viewNumber = Model.ViewNumber }*@ FormMethod.Post))
+{
+    <div class="form-group">
+        <label asp-for="ViewNumber">View Number:</label>
+        <input asp-for="ViewNumber" type="number" class="form-control" id="ViewNumber" name="ViewNumber" value="@Model.ViewNumber">
+    </div>
+         <div class="form-group">
+            <Label asp-for="QuestionText">Question Text:</Label>
+        <input asp-for="QuestionText" class="form-control" />
+                </div>
+                <h4>Options:</h4>
+                <div class="form-group" id="options">
+                    @for (int i = 0; i < Model.Answers.Count; i++){
+            <div class="option">
+
+                <input type="text" asp-for="Answers[0].Text" name="Answers[@i].Text" class="form-control" placeholder="option 1"  />
+              <input type="checkbox" asp-for="Answers[0].IsCorrect" name="Answers[@i].IsCorrect" />Correct
+            </div>
+                    }
+                </div>
+
+                        <button type="button" id="addOption" class="btn btn-secondary">Add Option</button>
+                           <button type="submit" class="btn btn-primary">Create</button>
+                           }
+@*</form>*@
+@section scripts{
+    <script>
+        $(document).ready(function (){
+            let optionCount = 1;
+            $("#addOption").on("click", function(){
+                const newOption = `<div class="option">
+                                    <input type="text" /*asp-for="Answers[${optionCount}].Text"*/ name="Answers[${optionCount}].Text" class="form-control" placeholder="Option ${optionCount + 1}"/>
+                       <input type="checkbox" /*asp-for="Answers[${optionCount}].IsCorrect"*/ name="Answers[${optionCount}].IsCorrect" value="true"  /> Correct </div>`;
+                   $("#options").append(newOption);
+                  optionCount++;
+            });
+        });
+    </script>
+}
+

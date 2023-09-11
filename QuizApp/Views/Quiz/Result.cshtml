@@ -1,21 +1,14 @@
-﻿@model QuizApp.Models.Question
-<h2>Quiz Result</h2>
-<h2>Your Score: @ViewBag.Percentage.ToString("0.00")%</h2>
-@*<table class="table">
-    <thead>
-        <tr>
-            <th>Question</th>
-             <th>Percentage</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach(var question in Model)
-        {
-            <tr>
-                  <td>@question.Text</td>
-                 <td>@question.PercentageCorrect?? 0%</td>
-            </tr>
-            
-        }
-    </tbody>
-</table>*@
+﻿@model double
+
+<h2>Result</h2>
+
+<p>Your score is: @Model%</p>
+
+@if (Model >= 70)
+{
+        <p>Congratulations! You passed!</p>
+}
+else
+{
+        <p>Sorry, you did not pass. Please try again.</p>
+}

@@ -1,2 +1,47 @@
-﻿
-<h4>Welcome to your Data Analysis Examination</h4>
+﻿@model CustomViewViewModel
+<h2>Welcome to your Data Analysis Examination</h2>
+@*<h3>View Number: @ViewBag.ViewNumber</h3>
+*@<h4>Questions and Options</h4>
+@*@using (Html.BeginForm("CalculateResult", "Quiz", new { viewNumber = 3 }, FormMethod.Post))
+{
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        <div>
+            <h4>@Model[i].Text</h4>
+            @for (var j = 0; j < Model[i].Answers.Count; j++)
+            {
+                <div>
+
+                    <input type="checkbox" name="submittedQuestions[@i].CorrectOptionIndex" value="@j" /> @Model[i].Answers[j].Text
+                </div>
+            }
+        </div>
+    }
+    <button type="submit">Submit</button>
+}
+
+*@
+<form method="post" asp-action="CalculateResult">
+    @for (var i = 0; i < Model.Questions.Count; i++)
+    {
+        var question = Model.Questions[i];
+        <div class="question">
+            <h4>@question.Text</h4>
+            <ul>
+                @for (var j = 0; j < question.Answers.Count; j++)
+                {
+                    var option = question.Answers[j];
+                    <li>
+                        <label>
+                            <input type="checkbox" name="viewModel.SubmittedQuestions[@i].QuestionId" value="@question.Id" />
+                            @option.Text
+                        </label>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    <input type="hidden" name="viewModel.ViewNumber" value="@Model.ViewNumber" />
+   <button type="submit">Submit</button>
+</form>

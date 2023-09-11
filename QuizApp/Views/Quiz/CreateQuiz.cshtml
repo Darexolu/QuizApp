@@ -1,28 +1,4 @@
 ﻿@model Question
-@*h2 class="text-primary">Post Questions</h2>
-<form method="post" enctype="multipart/form-data">
-   <div class="form-group  mt-2">
-       <input type="text" asp-for="Text" class="form-control pt-20 w-100" placeholder="Question" />
-       <span asp-validation-for="Text"></span>
-   </div>
-    <div class="form-group  mt-2">
-        <input type="text" name="optionText" asp-for="optionText" class="form-control pt-20" placeholder="option1" />
-        <span asp-validation-for="Text"></span>
-    </div>
-    <div class="form-group  mt-2">
-        <input name="optionText" type="text" asp-for="optionText" class="form-control pt-20" placeholder="option2" />
-        <span asp-validation-for="optionText"></span>
-    </div>
-    <div class="form-group  mt-2">
-        <Label for="isCorrect">Is Correct</Label>
-        <input type="checkbox" name="isCorrect" asp-for="isCorrect" value="IsCorrect" class="form-control pt-20 w-50" />
-        <span asp-validation-for="isCorrect"></span>
-    </div>
-
-    <div class="mt-2 w-50" >
-        <input type="submit" id="submit" value="Submit" class="btn btn-success" />
-    </div>
-</form>*@
     <h2>Create Questions</h2>
     <div asp-asp-validation-summary="Model Only"></div>
     <form asp-controller="Quiz" asp-action="CreateQuiz" method="post">

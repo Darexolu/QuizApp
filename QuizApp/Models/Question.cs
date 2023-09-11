@@ -9,10 +9,11 @@ namespace QuizApp.Models
     public class Question
     {
         public int Id { get; set; }
+       // [ValidateNever]
         public string Text { get; set; }
-        [ValidateNever]
+       [ValidateNever]
         public List<Answer> Answers { get; set; }
-        //[ForeignKey(nameof(Answer))]    
+         
 
     }
 }
