@@ -1,7 +1,7 @@
 ﻿@model CustomViewViewModel
 <h2>Welcome to your Data Analysis Examination</h2>
-@*<h3>View Number: @ViewBag.ViewNumber</h3>
-*@<h4>Questions and Options</h4>
+<h3>View Number: @ViewBag.ViewNumber</h3>
+<h4>Questions and Options</h4>
 @*@using (Html.BeginForm("CalculateResult", "Quiz", new { viewNumber = 3 }, FormMethod.Post))
 {
     @for (int i = 0; i < Model.Count; i++)
@@ -33,7 +33,7 @@
                     var option = question.Answers[j];
                     <li>
                         <label>
-                            <input type="checkbox" name="viewModel.SubmittedQuestions[@i].QuestionId" value="@question.Id" />
+                            <input type="checkbox" name="viewModel.Questions[@i].Id" value="@question.Id" />
                             @option.Text
                         </label>
                     </li>

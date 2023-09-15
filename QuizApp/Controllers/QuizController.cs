@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using QuizApp.Data;
+using QuizApp.Migrations;
 using QuizApp.Models;
 using QuizApp.Repositories.IRepository;
+using QuizApp.Services;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace QuizApp.Controllers
@@ -13,34 +15,37 @@ namespace QuizApp.Controllers
     {
         //private readonly IQuizRepository _quizRepository;
         private readonly AppDbContext _dbContext;
+        private readonly IQuestionService _questionService;
 
 
-        public QuizController(AppDbContext db)
+        public QuizController(AppDbContext db, IQuestionService questionService)
         {
             _dbContext = db;
-           
+            _questionService = questionService;
+
+
         }
 
 
-        
+
         public IActionResult CreateQuiz()
         {
             //var questions = _dbContext.Questions.Include(q => q.Answers).ToList();
 
             return View();
-           
+
         }
         [HttpPost]
         //[ValidateAntiForgeryToken]
         public IActionResult CreateQuiz(Question question) {
-           
+
             if (ModelState.IsValid)
             {
                 _dbContext.Questions.Add(question);
                 _dbContext.SaveChanges();
-                return RedirectToAction("Support","Quiz");
+                return RedirectToAction("Support", "Quiz");
             }
-           
+
             return View(question);
 
         }
@@ -56,7 +61,7 @@ namespace QuizApp.Controllers
         {
             return View();
         }
-       
+
         public IActionResult SubmitAnswer()
         {
             return View();
@@ -64,14 +69,14 @@ namespace QuizApp.Controllers
         [HttpPost]
         public IActionResult SubmitAnswer(List<int> answers)
         {
-            if(answers != null && answers.Count > 0)
+            if (answers != null && answers.Count > 0)
             {
                 var questions = _dbContext.Questions.Include(q => q.Answers).ToList();
                 double correctCount = 0;
-                for(int i = 0; i < answers.Count; i++)
+                for (int i = 0; i < answers.Count; i++)
                 {
                     int selecteOptionIndex = answers[i];
-                    if(selecteOptionIndex >= 0 && selecteOptionIndex < questions[i].Answers.Count)
+                    if (selecteOptionIndex >= 0 && selecteOptionIndex < questions[i].Answers.Count)
                     {
                         if (questions[i].Answers[selecteOptionIndex].IsCorrect)
                         {
@@ -96,8 +101,8 @@ namespace QuizApp.Controllers
 
         public IActionResult CalculateResult()
         {
-            
-            return View(); 
+
+            return View();
         }
 
         [HttpPost]
@@ -133,44 +138,81 @@ namespace QuizApp.Controllers
                 return NotFound(); // Handle the case where there are no correct answers for the selected view
             }
 
-            // Calculate the score based on the submitted answers and correct options
+            //calculate the score based on the submitted answers and correct options
+            //if (viewModel.SubmittedQuestions == null)
+            //{
+            //    viewModel.SubmittedQuestions = new List<SubmittedQuestionViewModel>(); // Initialize it as an empty list
+            //}
+
+
             int correctCount = 0;
 
-            foreach (var question in viewModel.Questions)
+            foreach (var submittedQuestion in viewModel.SubmittedQuestions)
             {
-                var submittedQuestion = viewModel.SubmittedQuestions.FirstOrDefault(sq => sq.QuestionId == question.Id);
-
-                if (submittedQuestion != null)
+                var correctAnswer = correctAnswers.FirstOrDefault(q => q.Id == submittedQuestion.QuestionId);
+                if (correctAnswer != null)
                 {
-                    var correctAnswer = correctAnswers.FirstOrDefault(q => q.Id == submittedQuestion.QuestionId);
-
-                    if (correctAnswer != null && correctAnswer.Answers.Any(o => o.IsCorrect) &&
-                        submittedQuestion.CorrectOptionIndex >= 0 && submittedQuestion.CorrectOptionIndex < correctAnswer.Answers.Count &&
-                        correctAnswer.Answers[submittedQuestion.CorrectOptionIndex].IsCorrect)
+                    // Check if the submitted answer index is valid
+                    if (submittedQuestion.CorrectOptionIndex >= 0 && submittedQuestion.CorrectOptionIndex < correctAnswer.Answers.Count)
                     {
-                        correctCount++;
+                        var selectedOption = correctAnswer.Answers[submittedQuestion.CorrectOptionIndex];
+
+                        // Find the corresponding correct answer for the question
+                        var correct = correctAnswers.FirstOrDefault(q => q.Id == correctAnswer.Id);
+
+                        if (correct != null)
+                        {
+                            var correctOption = correctAnswer.Answers.FirstOrDefault(o => o.IsCorrect);
+
+                            if (correctOption != null && correctOption.Id == selectedOption.Id)
+                            {
+                                correctCount++;
+                            }
+                        }
                     }
                 }
             }
 
-            double totalQuestions = correctAnswers.Count;
+
+
+
+
+
+            //for (int i = 0; i < viewModel.Questions.Count; i++)
+            //{
+            //    var query = viewModel.Questions.ToList();
+            //    int selecteOptionIndex = query[i].Id;
+            //    if (selecteOptionIndex >= 0 && selecteOptionIndex <= correctAnswers[i].Answers.Count)
+            //    {
+            //        if (correctAnswers[i].Answers[selecteOptionIndex].IsCorrect)
+            //        {
+            //            correctCount++;
+            //        }
+            //    }
+            //}
+            double totalQuestions = viewModel.Questions.Count;
             double percentage = (correctCount / totalQuestions) * 100;
-
-            // Redirect to a result view with the calculated percentage
+            ViewBag.Percentage = percentage;
             return RedirectToAction("Result", new { percentage });
+            
+           
         }
-       
 
-         [HttpGet]
-        public ActionResult CreateAllQuestions( int viewNumber)
+
+
+        [HttpGet]
+        public ActionResult CreateAllQuestions(int ViewNumber)
         {
+            //var questions = _questionService.GetQuestionsForView(ViewNumber)
+
             var model = new CreateQuestionViewModel
             {
-                ViewNumber = viewNumber,
+                //Text = QuestionText,
+                ViewNumber = ViewNumber,
                 Answers = new List<Answer>
                 {
                     new Answer()
-      
+
                 }
             };
             return View(model);
@@ -208,11 +250,14 @@ namespace QuizApp.Controllers
             return View(model);
         }
         [HttpGet]
-        public ActionResult Index(int viewNumber)
+        public ActionResult Index(int ViewNumber)
         {
             //var questions = _dbContext.Questions.Include(q => q.Answers).OrderBy(q => q.Id).ToList();
-          
-            List<Question> questions = null;
+            var viewModel = new CustomViewViewModel
+            {
+                ViewNumber = ViewNumber,
+                Questions = new List<Question>() //_questionService.GetQuestionsForView(ViewNumber)Initialize an empty list for questions
+            }; /*List<Question> questions = null;*/
             string viewName = null;
             //switch (viewNumber)
             //{
@@ -231,22 +276,22 @@ namespace QuizApp.Controllers
             //   default:
             //        return NotFound();
             //}
-            if (viewNumber == 1)
+            if (ViewNumber == 1)
             {
                 // Questions for View1 (e.g., questions 1 to 3)
-                questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
+                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
                 viewName = "Support2"; // Change this to your desired view name for View1
             }
-            else if (viewNumber == 2)
+            else if (ViewNumber == 2)
             {
                 // Questions for View2 (e.g., questions 4 to 6)
-                questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 4 && q.Id <= 6).ToList();
+                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 4 && q.Id <= 6).ToList();
                 viewName = "Development"; // Change this to your desired view name for View2
             }
-            else if (viewNumber == 3)
+            else if (ViewNumber == 3)
             {
                 // Questions for View3 (e.g., questions 7 to 9)
-                questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 7 && q.Id <= 9).ToList();
+                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 7 && q.Id <= 9).ToList();
                 viewName = "DataAnalysis"; // Change this to your desired view name for View3
             }
             else
@@ -254,43 +299,51 @@ namespace QuizApp.Controllers
                 return NotFound();
             }
 
-            return View(viewName, questions);
+            return View(viewName, viewModel);
         }
-        public ActionResult Support2(int viewNumber)
+        public ActionResult Support2()
         {
-            List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
-            var viewModel = new CustomViewViewModel
-            {
-                Questions = questions,
-                ViewNumber = viewNumber
-            };
-            ViewBag.ViewNumber = viewNumber; // Pass the viewNumber to the view
-            return View("Support2",viewModel);
-        }
-        //[Authorize(Roles = "Development")]
-        public ActionResult Development(int viewNumber)
-        {
-            List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 4 && q.Id <= 6).ToList();
-            var viewModel = new CustomViewViewModel
-            {
-                Questions = questions,
-                ViewNumber = viewNumber
-            };
-            ViewBag.ViewNumber = viewNumber; // Pass the viewNumber to the view
-            return View("Development",viewModel);
-        }
-        //[Authorize(Roles = "Data Analyst")]
-        public ActionResult DataAnalysis(int viewNumber)
-        {
-            List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 7 && q.Id <= 9).ToList();
-            var viewModel = new CustomViewViewModel
-            {
-                Questions = questions,
-                ViewNumber = viewNumber
-            };
-            ViewBag.ViewNumber = viewNumber; // Pass the viewNumber to the view
-            return View("DataAnalysis",viewModel);
+           
+               
+                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
+
+                var viewModel = new CustomViewViewModel
+                {
+                    Questions = questions,
+                    ViewNumber = 1,
+                    //SubmittedQuestions = submittedQuestions
+                };
+                ViewBag.ViewNumber = 1; // Pass the viewNumber to the view
+                return View("Support2", viewModel);
+            
         }
 
+
+
+            //[Authorize(Roles = "Development")]
+            public ActionResult Development()
+            {
+                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 4 && q.Id <= 6).ToList();
+                var viewModel = new CustomViewViewModel
+                {
+                    Questions = questions,
+                    ViewNumber = 2
+                };
+                ViewBag.ViewNumber = 2; // Pass the viewNumber to the view
+                return View("Development", viewModel);
+            }
+            //[Authorize(Roles = "Data Analyst")]
+            public ActionResult DataAnalysis()
+            {
+                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 7 && q.Id <= 9).ToList();
+                var viewModel = new CustomViewViewModel
+                {
+                    Questions = questions,
+                    ViewNumber = 3
+                };
+                ViewBag.ViewNumber = 3; // Pass the viewNumber to the view
+                return View("DataAnalysis", viewModel);
+            }
+
+        }
     }
-}

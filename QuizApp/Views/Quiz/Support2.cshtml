@@ -1,26 +1,52 @@
 ﻿@model CustomViewViewModel
 <h2>Hello Welcome to Support Role Examination</h2>
-@*<h3>View Number: @ViewBag.ViewNumber</h3>
-*@<h4>Questions and Options</h4>
-@*@using (Html.BeginForm("CalculateResult", "Quiz", new { viewNumber = 1 }, FormMethod.Post))
-{
-    @for(int i = 0; i < Model.Count; i++)
+<h3>View Number: @ViewBag.ViewNumber</h3>
+<h4>Questions and Options</h4>
+<form method="post" asp-action="CalculateResult">
+    @for (var i = 0; i < Model.Questions.Count; i++)
     {
-        <div>
-            <h4>@Model[i].Text</h4>
-            @for(var j = 0;  j < Model[i].Answers.Count; j++)
-            {    
-                <div>                 
-              <input type="checkbox"  name="submittedQuestions[@i].CorrectOptionIndex" value="@j"/> @Model[i].Answers[j].Text
-                </div>
-            }
+        var question = Model.Questions[i];
+        <div class="question">
+            <h4>@question.Text</h4>
+            <ul>
+                @for (var j = 0; j < question.Answers.Count; j++)
+                {
+                    var option = question.Answers[j];
+                    <li>
+                        <label>
+                            <input type="hidden" name="viewModel.Questions[@i].Id" value="@question.Id" />
+                            <input type="radio" name="viewModel.SubmittedQuestions[@i].QuestionId" value="@question.Id" />@option.Text
+                        </label>
+                    </li>
+                }
+            </ul>
+            <!-- Add a hidden input for the CorrectOptionIndex -->
+            <input type="hidden" name="viewModel.SubmittedQuestions[@i].CorrectOptionIndex" value="0" />
+
         </div>
     }
+
+    <input type="hidden" name="viewModel.ViewNumber" value="@Model.ViewNumber" />
     <button type="submit">Submit</button>
+</form>
+@section scripts{
+<script>
+    $(document).ready(function () {
+        $("input[type='radio']").change(function () {
+            var index = $(this).closest("li").index();
+            $(this).closest(".question").find("input[type='hidden']").val(index);
+        });
+    });
+</script>
 }
 
-*@
-<form method="post" asp-action="CalculateResult">
+
+
+
+
+
+
+@*<form asp-action="CalculateResult" method="post">
     @for (var i = 0; i < Model.Questions.Count; i++)
     {
         var question = Model.Questions[i];
@@ -30,12 +56,14 @@
                 @for (var j = 0; j < question.Answers.Count; j++)
                 {
                     var option = question.Answers[j];
+                
                             <li>
                                 <label>
-                                    <input type="checkbox" name="viewModel.SubmittedQuestions[@i].QuestionId" value="@question.Id" />
+                            <input type="checkbox" name="viewModel.Questions[@i].Id" value="@question.Id" />
                             @option.Text
                                 </label>
                             </li>
+                    
                 }
                 </ul>
             </div>
@@ -43,4 +71,4 @@
 
     <input type="hidden" name="viewModel.ViewNumber" value="@Model.ViewNumber" />
    <button type="submit">Submit</button>
-</form>
+</form>*@

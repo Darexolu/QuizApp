@@ -2,10 +2,11 @@
 {
     public class CustomViewViewModel
     {
-        public List<Question> Questions { get; set; }
         public int ViewNumber { get; set; }
+        public List<Question> Questions { get; set; }
         public List<SubmittedQuestionViewModel> SubmittedQuestions { get; set; }
-        
+        public List<List<bool>> SelectedOptions { get; set; }
+
     }
 }
 

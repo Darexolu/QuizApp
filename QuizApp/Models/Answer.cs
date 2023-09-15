@@ -9,7 +9,7 @@ namespace QuizApp.Models
         public string Text { get; set; }
         public bool IsCorrect { get; set; } 
         public int QuestionId { get; set; }
-        [ValidateNever]
+       [ValidateNever]
         public Question Question{ get; set; }
    
 

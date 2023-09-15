@@ -6,9 +6,9 @@ namespace QuizApp.Models
     {
         public int Id { get; set; }
         [ValidateNever]
+        public int ViewNumber { get; set; }
         public string QuestionText { get; set; }
         public int CorrectOptionIndex { get; set; }
         public List<Answer> Answers { get; set; }
-        public int ViewNumber { get; set; }
     }
 }

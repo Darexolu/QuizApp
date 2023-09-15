@@ -5,6 +5,7 @@ using QuizApp.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using QuizApp.Repositories.IRepository;
 using QuizApp.Repositories;
+using QuizApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+
+builder.Services.AddScoped<IQuestionService, QuestionService>();
+
 
 builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 builder.Services.AddRazorPages();

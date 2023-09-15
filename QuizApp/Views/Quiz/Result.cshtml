@@ -1,10 +1,11 @@
-﻿@model double
+﻿@model CustomViewViewModel
 
 <h2>Result</h2>
 
-<p>Your score is: @Model%</p>
+@*<p>Your score is: @Model%</p>*@
+<h3>Your Score: @ViewBag.Percentage.ToString("0.00")%</h3>
 
-@if (Model >= 70)
+@if (@ViewBag.Percentage >= 70)
 {
         <p>Congratulations! You passed!</p>
 }

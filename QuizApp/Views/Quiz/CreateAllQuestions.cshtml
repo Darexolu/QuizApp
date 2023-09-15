@@ -7,6 +7,7 @@
     <div class="form-group">
         <label asp-for="ViewNumber">View Number:</label>
         <input asp-for="ViewNumber" type="number" class="form-control" id="ViewNumber" name="ViewNumber" value="@Model.ViewNumber">
+                <span asp-validation-for="ViewNumber" class="text-danger"></span>
     </div>
          <div class="form-group">
             <Label asp-for="QuestionText">Question Text:</Label>
