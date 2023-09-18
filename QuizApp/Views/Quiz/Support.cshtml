@@ -1,23 +1,49 @@
-﻿@model List<Question>
-<h2>Hello Welcome to Support Role Examination</h2>
-<h4>Questions and Options</h4>
-@using (Html.BeginForm("SubmitAnswer", "Quiz", FormMethod.Post))
-{
-    @for(int i = 0; i < Model.Count; i++)
+﻿@model CustomViewViewModel
+<h2 class="text-primary" style="text-align: center; color: blue; background-color: rgb(174, 181, 181); border: 2px 4px solid; border-color: black; border-radius: 5px; 
+   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">Welcome to IT Support Examination</h2>
+<h3 style="font-size: 15px; text-align: center;font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">View Number: @ViewBag.ViewNumber</h3>
+<h4 style="color: rgb(240, 233, 11);text-decoration: underline; margin-bottom: 10px;">Questions and Options</h4>
+<form method="post" asp-action="CalculateResult">
+    @for (var i = 0; i < Model.Questions.Count; i++)
     {
-        <div>
-            <h4>@Model[i].Text</h4>
-            @for(var j = 0;  j < Model[i].Answers.Count; j++)
-            {    
-                <div>
-                    
-                  <input type="checkbox"  name="answers[@i]" value="@j"/> @Model[i].Answers[j].Text
-                </div>
-            }
+        var question = Model.Questions[i];
+        <div class="question" style="font-family: 'Calibri';">
+            <h4>@(i + 1). @question.Text</h4>
+                <ul class="list-unstyled">
+                @for (var j = 0; j < question.Answers.Count; j++)
+                {
+                    var option = question.Answers[j];
+                    <li>
+                        <label>
+                            <input type="hidden" name="viewModel.Questions[@i].Id" value="@question.Id" />
+                            <input type="radio" name="viewModel.SubmittedQuestions[@i].QuestionId" value="@question.Id" />@option.Text
+                        </label>
+                    </li>
+                }
+            </ul>
+            <!-- Add a hidden input for the CorrectOptionIndex -->
+            <input type="hidden" name="viewModel.SubmittedQuestions[@i].CorrectOptionIndex" value="0" />
+
         </div>
     }
-    <button type="submit">Submit</button>
+
+    <input type="hidden" name="viewModel.ViewNumber" value="@Model.ViewNumber" />
+    <button type="submit" style="background-color: green; color: white; border: 2px 2px solid; border-color: black; border-radius: 5px;">Submit</button>
+</form>
+@section scripts{
+<script>
+    $(document).ready(function () {
+        $("input[type='radio']").change(function () {
+            var index = $(this).closest("li").index();
+            $(this).closest(".question").find("input[type='hidden']").val(index);
+        });
+    });
+</script>
 }
 
-    
+
+
+
+
+
 

@@ -43,7 +43,7 @@ namespace QuizApp.Controllers
             {
                 _dbContext.Questions.Add(question);
                 _dbContext.SaveChanges();
-                return RedirectToAction("Support", "Quiz");
+                return RedirectToAction("Support2", "Quiz");
             }
 
             return View(question);
@@ -51,7 +51,7 @@ namespace QuizApp.Controllers
         }
 
         //[Authorize(Roles = "Support")]
-        public ActionResult Support()
+        public ActionResult Support2()
         {
             var question = _dbContext.Questions.Include(q => q.Answers).ToList();
 
@@ -88,7 +88,7 @@ namespace QuizApp.Controllers
                 ViewBag.Percentage = percentage;
                 return View();
             }
-            return View("Support");
+            return View("Support2");
         }
         [HttpGet]
         public ActionResult Result(double percentage)
@@ -232,7 +232,7 @@ namespace QuizApp.Controllers
                 //return RedirectToAction("Index");
                 if (model.ViewNumber == 1)
                 {
-                    return RedirectToAction("Support2");
+                    return RedirectToAction("Support");
                 }
                 else if (model.ViewNumber == 2)
                 {
@@ -280,7 +280,7 @@ namespace QuizApp.Controllers
             {
                 // Questions for View1 (e.g., questions 1 to 3)
                 viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
-                viewName = "Support2"; // Change this to your desired view name for View1
+                viewName = "Support"; // Change this to your desired view name for View1
             }
             else if (ViewNumber == 2)
             {
@@ -301,7 +301,7 @@ namespace QuizApp.Controllers
 
             return View(viewName, viewModel);
         }
-        public ActionResult Support2()
+        public ActionResult Support()
         {
            
                
@@ -314,7 +314,7 @@ namespace QuizApp.Controllers
                     //SubmittedQuestions = submittedQuestions
                 };
                 ViewBag.ViewNumber = 1; // Pass the viewNumber to the view
-                return View("Support2", viewModel);
+                return View("Support", viewModel);
             
         }
 
