@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -7,6 +8,7 @@ using QuizApp.Migrations;
 using QuizApp.Models;
 using QuizApp.Repositories.IRepository;
 using QuizApp.Services;
+using System.Security.Claims;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace QuizApp.Controllers
@@ -22,8 +24,6 @@ namespace QuizApp.Controllers
         {
             _dbContext = db;
             _questionService = questionService;
-
-
         }
 
 
@@ -32,8 +32,9 @@ namespace QuizApp.Controllers
         {
             //var questions = _dbContext.Questions.Include(q => q.Answers).ToList();
 
-            return View();
-
+            
+               return View();
+            
         }
         [HttpPost]
         //[ValidateAntiForgeryToken]
@@ -118,18 +119,18 @@ namespace QuizApp.Controllers
 
             if (viewModel.ViewNumber == 1)
             {
-                correctAnswers = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
+                correctAnswers = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 10).ToList();
 
 
             }
             else if (viewModel.ViewNumber == 2)
             {
-                correctAnswers = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 4 && q.Id <= 6).ToList();
+                correctAnswers = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 11 && q.Id <= 20).ToList();
 
             }
             else if (viewModel.ViewNumber == 3)
             {
-                correctAnswers = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 7 && q.Id <= 9).ToList();
+                correctAnswers = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 21 && q.Id <= 30).ToList();
 
             }
 
@@ -173,23 +174,6 @@ namespace QuizApp.Controllers
                 }
             }
 
-
-
-
-
-
-            //for (int i = 0; i < viewModel.Questions.Count; i++)
-            //{
-            //    var query = viewModel.Questions.ToList();
-            //    int selecteOptionIndex = query[i].Id;
-            //    if (selecteOptionIndex >= 0 && selecteOptionIndex <= correctAnswers[i].Answers.Count)
-            //    {
-            //        if (correctAnswers[i].Answers[selecteOptionIndex].IsCorrect)
-            //        {
-            //            correctCount++;
-            //        }
-            //    }
-            //}
             double totalQuestions = viewModel.Questions.Count;
             double percentage = (correctCount / totalQuestions) * 100;
             ViewBag.Percentage = percentage;
@@ -204,18 +188,25 @@ namespace QuizApp.Controllers
         public ActionResult CreateAllQuestions(int ViewNumber)
         {
             //var questions = _questionService.GetQuestionsForView(ViewNumber)
+            var isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
 
-            var model = new CreateQuestionViewModel
+            if (isAuthenticated == "true")
             {
-                //Text = QuestionText,
-                ViewNumber = ViewNumber,
-                Answers = new List<Answer>
+                
+           
+                var model = new CreateQuestionViewModel
+                {
+                    //Text = QuestionText,
+                    ViewNumber = ViewNumber,
+                    Answers = new List<Answer>
                 {
                     new Answer()
 
                 }
-            };
-            return View(model);
+                };
+                return View(model);
+            }
+            return RedirectToAction("Login"); // Redirect to a login page or show an access denied view
         }
         [HttpPost]
         public ActionResult CreateAllQuestions(CreateQuestionViewModel model)
@@ -249,15 +240,42 @@ namespace QuizApp.Controllers
             }
             return View(model);
         }
+
         [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Login(string password)
+        {
+            // Check if the provided password is correct 
+            if (password == Startup.DemoPassword)
+            {
+                
+
+                HttpContext.Session.SetString("IsAuthenticated", "true");
+
+                // Redirect to the CreateQuiz page after successful login
+                return RedirectToAction("CreateAllQuestions");
+            }
+            else
+            {
+                // Password is incorrect, show an error message or redirect to a login page with an error
+                ModelState.AddModelError(string.Empty, "Invalid password you are not Authorised to access this page.");
+                return View();
+            }
+        }
+
+     [HttpGet]
         public ActionResult Index(int ViewNumber)
         {
             //var questions = _dbContext.Questions.Include(q => q.Answers).OrderBy(q => q.Id).ToList();
             var viewModel = new CustomViewViewModel
             {
                 ViewNumber = ViewNumber,
-                Questions = new List<Question>() //_questionService.GetQuestionsForView(ViewNumber)Initialize an empty list for questions
-            }; /*List<Question> questions = null;*/
+                Questions = new List<Question>() //_questionService.GetQuestionsForView(ViewNumber)Initialize an empty 
+            }; 
             string viewName = null;
             //switch (viewNumber)
             //{
@@ -279,19 +297,19 @@ namespace QuizApp.Controllers
             if (ViewNumber == 1)
             {
                 // Questions for View1 (e.g., questions 1 to 3)
-                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
+                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 10).ToList();
                 viewName = "Support"; // Change this to your desired view name for View1
             }
             else if (ViewNumber == 2)
             {
                 // Questions for View2 (e.g., questions 4 to 6)
-                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 4 && q.Id <= 6).ToList();
+                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 11 && q.Id <= 20).ToList();
                 viewName = "Development"; // Change this to your desired view name for View2
             }
             else if (ViewNumber == 3)
             {
                 // Questions for View3 (e.g., questions 7 to 9)
-                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 7 && q.Id <= 9).ToList();
+                viewModel.Questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 21 && q.Id <= 30).ToList();
                 viewName = "DataAnalysis"; // Change this to your desired view name for View3
             }
             else
@@ -305,13 +323,12 @@ namespace QuizApp.Controllers
         {
            
                
-                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 3).ToList();
+                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 1 && q.Id <= 10).ToList();
 
                 var viewModel = new CustomViewViewModel
                 {
                     Questions = questions,
                     ViewNumber = 1,
-                    //SubmittedQuestions = submittedQuestions
                 };
                 ViewBag.ViewNumber = 1; // Pass the viewNumber to the view
                 return View("Support", viewModel);
@@ -323,7 +340,7 @@ namespace QuizApp.Controllers
             //[Authorize(Roles = "Development")]
             public ActionResult Development()
             {
-                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 4 && q.Id <= 6).ToList();
+                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 11 && q.Id <= 20).ToList();
                 var viewModel = new CustomViewViewModel
                 {
                     Questions = questions,
@@ -335,7 +352,7 @@ namespace QuizApp.Controllers
             //[Authorize(Roles = "Data Analyst")]
             public ActionResult DataAnalysis()
             {
-                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 7 && q.Id <= 9).ToList();
+                List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 21 && q.Id <= 30).ToList();
                 var viewModel = new CustomViewViewModel
                 {
                     Questions = questions,

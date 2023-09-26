@@ -19,8 +19,21 @@ builder.Services.AddScoped<IQuestionService, QuestionService>();
 
 builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 builder.Services.AddRazorPages();
-//builder.Services.AddScoped<Question, Question>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(5); // Set the session timeout
+    options.Cookie.HttpOnly = true; // Ensure cookies are HTTP-only
+    options.Cookie.IsEssential = true; // Make the session cookie essential
+});
+builder.Services.AddAuthentication("password")
+    .AddCookie("password", options =>
+    {
+        options.Cookie.Name = "password";
+        options.LoginPath = "/Quiz/Login"; // Replace with the actual controller and action for login
+    });
+
+
 
 var app = builder.Build();
 
@@ -40,6 +53,7 @@ app.UseAuthentication();;
 app.UseAuthorization();
 app.MapRazorPages();
 
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
