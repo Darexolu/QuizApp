@@ -18,7 +18,7 @@
                     <li>
                         <label>
                             <input type="hidden" name="viewModel.Questions[@i].Id" value="@question.Id" />
-                            <input type="radio" name="viewModel.SubmittedQuestions[@i].QuestionId" value="@question.Id" />@option.Text
+                            <input type="radio" name="viewModel.SubmittedQuestions[@i].QuestionId" value="@question.Id" /> @option.Text
                         </label>
                     </li>
                 }
@@ -30,6 +30,10 @@
     }
 
     <input type="hidden" name="viewModel.ViewNumber" value="@Model.ViewNumber" />
+    @if (User.IsInRole("Admin"))
+    {
+        <button asp-controller="Quiz" asp-action="BackToAddQuestions">Add More Questions</button>
+    }
     <button type="submit" style="background-color: green; color: white; border: 2px 2px solid; border-color: black; border-radius: 5px;">Submit</button>
 </form>
 @section scripts{

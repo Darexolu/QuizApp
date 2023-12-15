@@ -1,0 +1,36 @@
+﻿@using QuizApp.Data.Static;
+@inject UserManager<ApplicationUser> UserManager;
+@{
+    bool isUserOrAdmin = User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.User);
+}
+@if (isUserOrAdmin)
+{
+    <a class="btn btn-outline-primary my-2 my-sm-0">
+        <i class="bi bi-person-badge"></i> Hello <span class="text-success">@UserManager.GetUserName(User)!</span>
+    </a>
+}
+@if (!isUserOrAdmin)
+{
+    <a class="btn btn-outline-success my-2 my-sm-0" asp-controller="Account" asp-action="Login">
+        <i class="bi bi-box-arrow-in-right"></i> Log in
+    </a>
+
+    <span style="padding: 5px;"></span>
+
+    <a class="btn btn-outline-primary my-2 my-sm-0" asp-controller="Account" asp-action="Register">
+        <i class="bi bi-person-plus"></i> Register
+    </a>
+}
+
+@if (isUserOrAdmin)
+{
+    <span style="padding: 5px;"></span>
+    <form asp-controller="Account" asp-action="Logout">
+        <button class="btn btn-outline-danger my-2 my-sm-0">
+            <i class="bi bi-box-arrow-in-right"></i> Log out
+        </button>
+    </form>
+}
+
+
+

@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using QuizApp.Data;
-using QuizApp.Migrations;
+
 using QuizApp.Models;
 using QuizApp.Repositories.IRepository;
 using QuizApp.Services;
@@ -188,10 +189,10 @@ namespace QuizApp.Controllers
         public ActionResult CreateAllQuestions(int ViewNumber)
         {
             //var questions = _questionService.GetQuestionsForView(ViewNumber)
-            var isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+            //var isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
 
-            if (isAuthenticated == "true")
-            {
+            //if (isAuthenticated == "true")
+            //{
                 
            
                 var model = new CreateQuestionViewModel
@@ -205,8 +206,8 @@ namespace QuizApp.Controllers
                 }
                 };
                 return View(model);
-            }
-            return RedirectToAction("Login"); // Redirect to a login page or show an access denied view
+            //}
+           /* return RedirectToAction("Login");*/ // Redirect to a login page or show an access denied view
         }
         [HttpPost]
         public ActionResult CreateAllQuestions(CreateQuestionViewModel model)
@@ -270,11 +271,10 @@ namespace QuizApp.Controllers
      [HttpGet]
         public ActionResult Index(int ViewNumber)
         {
-            //var questions = _dbContext.Questions.Include(q => q.Answers).OrderBy(q => q.Id).ToList();
             var viewModel = new CustomViewViewModel
             {
                 ViewNumber = ViewNumber,
-                Questions = new List<Question>() //_questionService.GetQuestionsForView(ViewNumber)Initialize an empty 
+                Questions = new List<Question>() 
             }; 
             string viewName = null;
             //switch (viewNumber)
@@ -335,9 +335,6 @@ namespace QuizApp.Controllers
             
         }
 
-
-
-            //[Authorize(Roles = "Development")]
             public ActionResult Development()
             {
                 List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 11 && q.Id <= 20).ToList();
@@ -349,7 +346,7 @@ namespace QuizApp.Controllers
                 ViewBag.ViewNumber = 2; // Pass the viewNumber to the view
                 return View("Development", viewModel);
             }
-            //[Authorize(Roles = "Data Analyst")]
+           
             public ActionResult DataAnalysis()
             {
                 List<Question> questions = _dbContext.Questions.Include(q => q.Answers).Where(q => q.Id >= 21 && q.Id <= 30).ToList();
@@ -361,6 +358,11 @@ namespace QuizApp.Controllers
                 ViewBag.ViewNumber = 3; // Pass the viewNumber to the view
                 return View("DataAnalysis", viewModel);
             }
-
+        [HttpPost]
+        public IActionResult BackToAddQuestions()
+        {
+            
+            return RedirectToAction("CreateAllQuestions", "Quiz");
         }
+    }
     }

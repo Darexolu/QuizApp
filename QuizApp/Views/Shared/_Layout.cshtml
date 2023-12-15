@@ -28,11 +28,13 @@
                         @*<li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Quiz" asp-action="CreateQuiz">Create Quiz</a>
                         </li>*@
+                        @if(User.IsInRole("Admin")){
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Quiz" asp-action="CreateAllQuestions">Create Quizes</a>
                         </li>
+                        }
                     </ul>
-                    <partial name= "_LoginPartial" />
+                    <partial name= "_Identity" />
                 </div>
             </div>
         </nav>

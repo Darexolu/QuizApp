@@ -11,13 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 
 
-builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<ApplicationUser,IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddSession(options =>
@@ -33,6 +33,8 @@ builder.Services.AddAuthentication("password")
         options.LoginPath = "/Quiz/Login"; // Replace with the actual controller and action for login
     });
 
+var serviceProvider = builder.Services.BuildServiceProvider();
+var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
 
 var app = builder.Build();
@@ -58,5 +60,6 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+AppDbInitializer.SeedData(dbContext);
+AppDbInitializer.SeedUsersAndRolesAsync(app).Wait();
 app.Run();
